@@ -1,8 +1,10 @@
 #!/usr/bin/python3
-"""Module for State class"""
+"""This module creates a Amenity class"""
+
 from models.base_model import BaseModel
 
 
 class Amenity(BaseModel):
-    """Inherits from BaseModel"""
+    """Class for managing amenity objects"""
+
     name = ""
