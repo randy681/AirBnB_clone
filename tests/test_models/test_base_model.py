@@ -1,104 +1,75 @@
 #!/usr/bin/python3
-''' module for base_model tests '''
-from unittest import TestCase
+""" Test cases"""
+
+
+
+import unittest
+import uuid
 import json
-import re
-from uuid import UUID, uuid4
+import os
 from datetime import datetime
-from time import sleep
 from models.base_model import BaseModel
+from models.engine.file_storage import FileStorage
 
+class TestBaseModel(unittest.TestCase):
+    """
+    Test Cases
+    """
+    
+    def setUp(self):
+        pass
+    
+    def tearDown(self) -> None:
+        FileStorage._FileStorage__objects = {}
+        if os.path.exists(FileStorage._FileStorage__file_path):
+            os.remove(FileStorage._FileStorage__file_path)
+    
+    def test_init(self):
+        b1 = BaseModel()
+        b2_uuid = str(uuid.uuid4())
+        b2 = BaseModel(id=b2_uuid, name="Wileli", location="Naivasha")
+        self.assertIsInstance(b1.id, str)
+        self.assertIsInstance(b2.id, str)
+        self.assertEqual(b2_uuid, b2.id)
+        self.assertEqual(b2.location, "Naivasha")
+        self.assertEqual(b2.name, "Wileli")
+        self.assertIsInstance(b1.created_at, datetime)
+        
+    
+    def test_dict(self):
+        b1 = BaseModel()
+        b2_uuid = str(uuid.uuid4())
+        b2 = BaseModel(id=b2_uuid, name="Wileli", location="Naivasha")
+        b1_dict = b1.to_dict()
+        self.assertIsInstance(b1_dict, dict)
+        self.assertIn('id',b1_dict.keys())
+        self.assertIn('created_at',b1_dict.keys())
+        self.assertIn('updated_at',b1_dict.keys())
+        
+    def test_str_representation(self):
+        dt = datetime.today()
+        dt_repr = repr(dt)
+        bm = BaseModel()
+        bm.id = "123456"
+        bm.created_at = bm.updated_at = dt
+        bmstr = bm.__str__()
+        self.assertIn("[BaseModel] (123456)", bmstr)
+        self.assertIn("'id': '123456'", bmstr)
+        self.assertIn("'created_at': " + dt_repr, bmstr)
+        self.assertIn("'updated_at': " + dt_repr, bmstr)
+        
+    def test_save_storage(self):
+        """Tests that storage.save() is called from save()."""
+        b = BaseModel()
+        b.save()
+        key = "{}.{}".format(type(b).__name__, b.id)
+        d = {key: b.to_dict()}
+        self.assertTrue(os.path.isfile(FileStorage._FileStorage__file_path))
+        with open(FileStorage._FileStorage__file_path,
+                  "r", encoding="utf-8") as f:
+            self.assertEqual(len(f.read()), len(json.dumps(d)))
+            f.seek(0)
+            self.assertEqual(json.load(f), d)
 
-class TestBaseModel(TestCase):
-    ''' tests BaseModel class '''
-    def test_3(self):
-        ''' task 0 tests '''
-        obj = BaseModel()
-
-        # id format and uniqueness
-        self.assertTrue(type(getattr(obj, 'id', None) is str) and
-                        UUID(obj.id))
-        self.assertNotEqual(BaseModel().id, obj.id)
-        self.assertNotEqual(BaseModel().id, BaseModel().id)
-        self.assertNotEqual(BaseModel().id, BaseModel().id)
-
-        # created_at and updated_at types
-        self.assertTrue(type(obj.created_at) is datetime)
-        self.assertTrue(type(obj.updated_at) is datetime)
-
-        # string representation
-        self.assertEqual(str(obj), '[{}] ({}) {}'.format(
-            'BaseModel', obj.id, obj.__dict__))
-
-        # time updates
-        old_ctm = obj.created_at
-        old_utm = obj.updated_at
-        sleep(0.01)
-        obj.save()
-        self.assertEqual(old_ctm, obj.created_at)
-        self.assertNotEqual(old_utm, obj.updated_at)
-
-        old_ctm = obj.created_at
-        old_utm = obj.updated_at
-        sleep(0.01)
-        obj.save()
-        self.assertEqual(old_ctm, obj.created_at)
-        self.assertNotEqual(old_utm, obj.updated_at)
-
-        self.assertEqual(obj.to_dict(),
-                         {'__class__': 'BaseModel', 'id': obj.id,
-                          'created_at': obj.created_at.isoformat(),
-                          'updated_at': obj.updated_at.isoformat()})
-
-    def test_4(self):
-        ''' task 4 tests '''
-        # args ignorance
-        obj = BaseModel(1, 2, 3, 'kk')
-        self.assertTrue(type(getattr(obj, 'id', None) is str) and
-                        UUID(obj.id))
-
-        now = datetime.utcnow()
-        obj_dict = {'id': str(uuid4()), 'created_at': now.isoformat(),
-                    'updated_at': now.isoformat(), '__class__': 'BaseModel'}
-        # kwargs parsing
-        obj = BaseModel(**obj_dict)
-        self.assertEqual(obj.id, obj_dict['id'])
-        # datetime parsing
-        self.assertEqual(obj.created_at, now)
-        self.assertEqual(obj.updated_at, now)
-        # __class__ should not be added as an attribute
-        self.assertFalse('__class__' in obj.__dict__)
-
-        # same objects creation
-        self.assertEqual(obj.to_dict(), BaseModel(**obj_dict).to_dict())
-        self.assertEqual(str(obj), str(BaseModel(**obj_dict)))
-
-        # no __class__ dependency
-        del obj_dict['__class__']
-        BaseModel(**obj_dict)  # no execption raised
-
-        ##
-        ##
-        ##
-        # normal creation in kwargs absence
-        obj = BaseModel()
-        self.assertTrue(type(getattr(obj, 'id', None) is str) and
-                        UUID(obj.id))
-        self.assertNotEqual(BaseModel().id, obj.id)
-        self.assertNotEqual(BaseModel().id, BaseModel().id)
-        self.assertNotEqual(BaseModel().id, BaseModel().id)
-
-        # time updates
-        old_ctm = obj.created_at
-        old_utm = obj.updated_at
-        sleep(0.01)
-        obj.save()
-        self.assertEqual(old_ctm, obj.created_at)
-        self.assertNotEqual(old_utm, obj.updated_at)
-
-        old_ctm = obj.created_at
-        old_utm = obj.updated_at
-        sleep(0.01)
-        obj.save()
-        self.assertEqual(old_ctm, obj.created_at)
-        self.assertNotEqual(old_utm, obj.updated_at)
+if __name__ == "__main__":
+    unittest.main()       

@@ -1,14 +1,13 @@
 #!/usr/bin/python3
-''' module for Place class '''
-from .base_model import BaseModel
+""""Place class"""
+from models.base_model import BaseModel
 
 
 class Place(BaseModel):
-    ''' a Place class '''
-    city_id = ''
-    user_id = ''
-    name = ''
-    description = ''
+    city_id = ""
+    user_id = ""
+    name = ""
+    description = ""
     number_rooms = 0
     number_bathrooms = 0
     max_guest = 0
