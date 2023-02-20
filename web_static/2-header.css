@@ -1,0 +1,13 @@
+header {
+<<<<<<< HEAD
+    width: 100%;
+    height: 70px;
+    background: #FF0000;
+    grid-area: header;
+    align-self: flex-start;
+=======
+	background-color: #FF0000;
+	height: 70px;
+	width: 100%;
+>>>>>>> 5f8c5ccd1a80ad6b69caa1aa1e4e646272db2a0e
+}

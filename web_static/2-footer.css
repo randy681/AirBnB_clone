@@ -1,0 +1,23 @@
+footer {
+<<<<<<< HEAD
+    position: fixed;
+    display: flex;
+    width: 100%;
+    height: 60px;
+    grid-area: footer;
+    align-self: flex-end;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: #00FF00;
+=======
+	background-color: #00FF00;
+	height: 60px;
+	width: 100%;
+	position: fixed;
+	justify-content: center;
+	align-items: center;
+	bottom: 0;
+	display: flex;
+>>>>>>> 5f8c5ccd1a80ad6b69caa1aa1e4e646272db2a0e
+}
